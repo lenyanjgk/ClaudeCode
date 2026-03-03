@@ -23,6 +23,7 @@
   - [5.4 故障排查](#54-故障排查)
 - [6. 内置命令速查](#6-内置命令速查)
 - [7. 总结](#7-总结)
+- [8. 参考资料](#8-参考资料)
 
 ---
 
@@ -359,3 +360,12 @@ allowed-tools:
 4. **最小权限原则**：按角色只开放必要工具
 5. **条件逻辑**：自然语言描述分支，Claude 正确执行
 6. **高级用法**：链式调用多步骤工作流、模块化共享片段、社区命令资源借力
+
+---
+
+## 8. 参考资料
+
+**官方文档与教程**：
+- [知乎讲解：Claude Commands 自定义命令完整指南](https://zhuanlan.zhihu.com/p/1974062756123658107)
+- [Claude 中文文档：自定义 Commands 开发指南](https://claudecn.com/docs/claude-code/advanced/custom-commands/)
+- [知乎：Commands 实战案例与最佳实践](https://zhuanlan.zhihu.com/p/1960414407042512481)

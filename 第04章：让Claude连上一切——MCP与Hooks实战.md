@@ -10,6 +10,7 @@
   - [2.4 三大作用域](#24-三大作用域)
   - [2.5 在 Commands 中调用 MCP](#25-在-commands-中调用-mcp)
   - [2.6 故障排查](#26-故障排查)
+  - [2.7 参考资料](#27-参考资料)
 - [3. Hooks 系统](#3-hooks-系统)
   - [3.1 Hooks 是什么](#31-hooks-是什么)
   - [3.2 配置方式](#32-配置方式)
@@ -18,6 +19,7 @@
   - [3.5 常用场景速查](#35-常用场景速查)
   - [3.6 故障排查](#36-故障排查)
 - [4. 总结](#4-总结)
+- [5. 参考资料](#5-参考资料)
 
 ---
 
@@ -78,6 +80,26 @@ claude mcp list                          # 查看所有
 claude mcp remove <名称>                 # 删除
 ```
 
+```
+claude mcp add filesystem -s user -- npx -y @modelcontextprotocol/server-filesystem D:/Desktop D:/develop
+```
+
+![image-20260303093940759](D:\Desktop\cc\assets\image-20260303093940759.png)
+
+```
+claude mcp list
+```
+
+![image-20260303094059462](D:\Desktop\cc\assets\image-20260303094059462.png)
+
+```
+claude mcp remove filesystem -s user
+```
+
+![image-20260303094135986](D:\Desktop\cc\assets\image-20260303094135986.png)
+
+删除成功：![image-20260303094218308](D:\Desktop\cc\assets\image-20260303094218308.png)
+
 **作用域指定：**
 
 ```bash
@@ -119,7 +141,9 @@ claude mcp add --scope user <名称> ...     # 用户级（全局）
 }
 ```
 
-启动 `claude` 时看到 `✓ filesystem` `✓ github` 即配置成功。
+启动 `claude` 时看到 `✓ filesystem` `✓ github` 即配置成功，C盘目录下 用户名下的 .claude.json文件。
+
+![image-20260303094322453](D:\Desktop\cc\assets\image-20260303094322453.png)
 
 ### 2.4 三大作用域
 
@@ -146,6 +170,8 @@ allowed-tools:
 
 这样 Commands 就能直接驱动 GitHub、文件系统、搜索等外部服务，形成完整自动化工作流。
 
+![image-20260303092442716](D:\Desktop\cc\assets\image-20260303092442716.png)
+
 ### 2.6 故障排查
 
 | 现象 | 原因 | 解决方法 |
@@ -164,14 +190,19 @@ allowed-tools:
 
 Hooks 是**事件驱动的自动化触发器**——Claude 执行特定操作时，自动运行你预设的 shell 脚本。
 
+比如可以在ClaudeCode 写完代码后，自动执行某些命令的格式化，以便让最终的代码更加美观，更加符合我们的需求
+
 | Hook 时机 | 触发事件 | 典型用途 |
 |-----------|---------|---------|
 | `PreToolUse` | Claude 调用工具**之前** | 安全拦截危险命令、参数校验 |
 | `PostToolUse` | Claude 调用工具**之后** | 自动 lint / 测试 / 格式化 |
+| PostToolUseFailure | Claude 调用工具失败后 | 错误日志记录、重试机制触发、失败原因分析 |
 | `Notification` | Claude 发送通知时 | 桌面弹窗、音效提醒 |
 | `Stop` | Claude 完成一轮回复后 | 自动保存、发送完成通知 |
 
 > 类比：MCP 是给 Claude 装插件，Hooks 是给 Claude 装"自动触发器"——它做完某件事就自动帮你跑一段脚本。
+
+![image-20260303094903495](D:\Desktop\cc\assets\image-20260303094903495.png)
 
 ### 3.2 配置方式
 
@@ -206,7 +237,7 @@ Hooks 写在 `settings.json` 的 `hooks` 字段，支持两个位置：
 
 ### 3.3 实战示例
 
-**示例一：写完文件自动格式化（最常用）**
+**写完文件自动格式化（最常用）**提取路径 + 格式化文件
 
 ```json
 {
@@ -217,58 +248,13 @@ Hooks 写在 `settings.json` 的 `hooks` 字段，支持两个位置：
         "hooks": [
           {
             "type": "command",
-            "command": "npx prettier --write $CLAUDE_FILE_PATHS 2>/dev/null || true"
+            "command": "jq -r '.tool_input.file_path' I xargs prettier --write"
           }
         ]
       }
     ]
   }
 }
-```
-
-**示例二：Bash 命令安全守卫**
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo \"[Hook] 即将执行：$CLAUDE_TOOL_INPUT\" >> ~/.claude/bash.log"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**示例三：完成任务后发桌面通知（macOS）**
-
-```json
-{
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "osascript -e 'display notification \"Claude 完成了！\" with title \"Claude Code\"'"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-Windows 通知版：将 command 替换为：
-```
-powershell -c "[System.Windows.Forms.MessageBox]::Show('Claude 完成了！')"
 ```
 
 ### 3.4 可用环境变量
@@ -317,10 +303,18 @@ Hook 脚本执行时，Claude 会注入以下变量：
 5. **Hooks 本质**：事件驱动的 shell 脚本，PreToolUse / PostToolUse / Stop 三大时机
 6. **Hooks 实战**：自动格式化、安全日志、完成通知，一次配置永久生效
 
-**下一步学习：**
+---
 
-| 章节 | 主题 | 你将学到 |
-|------|------|---------|
-| 第05章 | CLAUDE.md 配置 | 让 Claude 长期记住项目规范和个人偏好 |
-| 第06章 | Skills 定制 | 把复杂 SOP 封装成可复用技能包 |
-| 第08章 | Claude Agent SDK | Subagents 多角色协作、并行任务编排 |
+## 5. 参考资料
+
+### MCP 相关资源
+
+- [Claude Code 官方 MCP 文档](https://code.claude.com/docs/zh-CN/mcp)
+- [知乎深度讲解：MCP 协议与应用实战](https://zhuanlan.zhihu.com/p/1963592231739957552)
+- [CSDN 教程：Claude Code MCP 集成完整指南](https://blog.csdn.net/m0_74837192/article/details/150616899)
+
+### Hooks 相关资源
+
+- [Claude Code 官方 Hooks 文档](https://code.claude.com/docs/zh-CN/hooks)
+- [知乎深度讲解：Claude Hooks 自动化工作流完全指南](https://zhuanlan.zhihu.com/p/1950634615065809103)
+- [CSDN 教程：Claude Hooks 实战与最佳实践](https://blog.csdn.net/qq_20042935/article/details/156891507)
