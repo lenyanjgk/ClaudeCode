@@ -513,9 +513,9 @@ Claude 会同时启动 3 个子代理，返回综合报告。
 
 ### Subagent 相关资源
 
-- [VoltAgent - Awesome Claude Code Subagents](https://github.com/VoltAgent/awesome-claude-code-subagents)
-- [Subagent 子代理完整指南：100+ 专家代理一键扩展](https://mp.weixin.qq.com/s)
-- [Claude Code Task 工具官方文档](https://code.claude.com/docs/zh-CN/task-tool)
+- [Claude Code 官方 Subagent 文档](https://code.claude.com/docs/zh-CN/sub-agents)
+- [CSDN 深度教程：Subagent 子代理完整指南](https://blog.csdn.net/qq_20042935/article/details/156897940)
+- [ClaudeCN 中文文档：Subagent 高级用法](https://claudecn.com/docs/claude-code/advanced/subagents/)
 
 ---
 
