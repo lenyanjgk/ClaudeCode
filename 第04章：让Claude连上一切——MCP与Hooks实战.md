@@ -18,8 +18,14 @@
   - [3.4 可用环境变量](#34-可用环境变量)
   - [3.5 常用场景速查](#35-常用场景速查)
   - [3.6 故障排查](#36-故障排查)
-- [4. 总结](#4-总结)
-- [5. 参考资料](#5-参考资料)
+- [4. Subagent 子代理体系](#4-subagent-子代理体系)
+  - [4.1 Subagent 是什么](#41-subagent-是什么)
+  - [4.2 快速安装](#42-快速安装)
+  - [4.3 代理目录总览](#43-代理目录总览)
+  - [4.4 并行调用多个专家](#44-并行调用多个专家)
+  - [4.5 故障排查](#45-故障排查)
+- [5. 总结](#5-总结)
+- [6. 参考资料](#6-参考资料)
 - [下一步学习](#下一步学习)
 
 ---
@@ -294,7 +300,189 @@ Hook 脚本执行时，Claude 会注入以下变量：
 
 ---
 
-## 4. 总结
+## 4. Subagent 子代理体系
+
+### 4.1 Subagent 是什么
+
+学完 MCP 和 Hooks，你已经能扩展 Claude 的能力边界——让它能调用外部服务、自动运行脚本。
+
+但还有个更深的问题——**一个 Claude 怎么同时精通 100+ 个专业领域？**
+
+**Subagent（子代理）**就是答案：Claude Code 通过 Task 工具启动的**专业化 AI 代理**，每个都是该领域的专家。
+
+| 工具 | 解决什么问题 | 类比 |
+|------|------------|------|
+| MCP | 让 Claude 调用外部服务 | 给 Claude 装"插件" |
+| Hooks | 让 Claude 自动运行脚本 | 给 Claude 设"自动触发器" |
+| **Subagent** | **让 Claude 调动专家团队** | **给 Claude 配"顾问团队"** |
+
+#### Subagent 的核心优势
+
+**并行协作**：同时启动多个专家代理，处理不同任务，效率翻倍。
+
+```
+单个 Claude 顺序处理：
+  代码审查 → 性能优化 → 安全审计 → 文档生成（耗时）
+
+多个 Subagent 并行处理：
+  code-reviewer  ─────┐
+  performance-pro ────┼──→ 同时并行，结果聚合（快速）
+  security-auditor ───┤
+  doc-writer  ────────┘
+```
+
+**领域专业化**：每个 Subagent 都是特定领域的深度专家，质量远高于通用 Claude。
+
+**按需扩展**：100+ 专家代理库，你只需说一句话，Claude 自动调用最合适的专家。
+
+> **⚠️ 重要提醒**：使用多 Agent 并行调用的 token 消耗量巨大。每启动一个子代理都会消耗独立的上下文窗口。**建议按需调用，不要一次性启动太多代理。**
+
+---
+
+### 4.2 快速安装
+
+#### 方法一：用 GitHub MCP 自动安装（最省事）
+
+如果你配置了 GitHub MCP 服务器（见第2章），直接在 Claude Code 输入：
+
+```
+使用 Github MCP，帮我下载安装 https://github.com/VoltAgent/awesome-claude-code-subagents
+```
+
+Claude 会**自动克隆仓库、识别代理定义文件，并安装到正确位置**。
+
+#### 方法二：交互式脚本安装（推荐）
+
+```bash
+git clone https://github.com/VoltAgent/awesome-claude-code-subagents.git
+cd awesome-claude-code-subagents
+./install-agents.sh
+```
+
+按照屏幕提示操作：该脚本允许你浏览分类、选择特定代理并一键完成**安装或卸载**。
+
+#### 方法三：一行命令快速安装（无需克隆）
+
+```bash
+curl -sO https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/install-agents.sh
+chmod +x install-agents.sh
+./install-agents.sh
+```
+
+#### 方法四：手动安装（完全控制）
+
+1. **确定存放路径**：
+   - 全局可用：`~/.claude/agents/`
+   - 项目专用：`.claude/agents/`（项目根目录）
+
+2. **复制文件**：从仓库的 `categories/` 文件夹中找到你需要的 `.md` 代理定义文件，复制到上述路径即可。
+
+**验证安装**：
+```bash
+# 查看已启用的子代理
+claude /agents
+```
+
+> **优先级规则**：如果同一个代理同时存在于项目文件夹和全局文件夹，项目特定代理的优先级更高。
+
+---
+
+### 4.3 代理目录总览
+
+VoltAgent 提供的 10 大类专家代理（100+ 代理），按需安装：
+
+#### 1️⃣ 核心开发 (Core Development)
+api-designer / backend-developer / electron-pro / frontend-developer / fullstack-developer / graphql-architect / microservices-architect / mobile-developer / ui-designer / websocket-engineer / wordpress-master
+
+#### 2️⃣ 语言专家 (Language Specialists)
+typescript-pro / python-pro / rust-engineer / golang-pro / java-architect / javascript-pro / react-expert / vue-expert / angular-architect / nextjs-developer / swift-expert / kotlin-expert / cpp-pro / csharp-developer / php-pro / sql-pro / django-developer / laravel-expert / rails-expert / spring-boot-engineer / flutter-expert / elixir-expert / dotnet-core-expert / powershell-pro
+
+#### 3️⃣ 基础设施 (Infrastructure)
+cloud-architect / devops-engineer / kubernetes-expert / terraform-engineer / database-admin / sre / deployment-engineer / azure-infra-engineer / network-engineer / platform-engineer / security-engineer / incident-responder / windows-infra-admin
+
+#### 4️⃣ 质量与安全 (Quality & Security)
+code-reviewer / security-auditor / qa-automation-engineer / performance-engineer / debugging-expert / error-detective / penetration-tester / architecture-reviewer / accessibility-tester / chaos-engineer / compliance-auditor / testing-automation-expert
+
+#### 5️⃣ 数据与人工智能 (Data & AI)
+ai-engineer / llm-architect / ml-engineer / data-engineer / data-scientist / data-analyst / database-optimizer / postgres-pro / mlops-engineer / nlp-engineer / prompt-engineer
+
+#### 6️⃣ 开发者体验 (Developer Experience)
+refactoring-expert / documentation-engineer / git-workflow-manager / legacy-code-modernizer / mcp-developer / build-engineer / cli-developer / dependency-manager / dx-optimizer / tooling-engineer
+
+#### 7️⃣ 专业领域 (Specialized Domains)
+blockchain-developer / game-developer / fintech-engineer / iot-engineer / embedded-systems-engineer / api-documenter / seo-specialist / mobile-app-developer / m365-admin
+
+#### 8️⃣ 业务与产品 (Business & Product)
+product-manager / business-analyst / project-manager / scrum-master / technical-writer / ux-researcher / customer-success-manager / sales-engineer / legal-advisor / content-marketing-specialist
+
+#### 9️⃣ 元数据与编排 (Meta & Orchestration)
+multi-agent-coordinator / workflow-orchestrator / agent-organizer / agent-installer / context-manager / task-dispatcher / error-coordinator / performance-monitor / knowledge-synthesizer / it-ops-orchestrator
+
+**推荐新手起点**：
+- `code-reviewer`（代码审查）
+- `debugging-expert`（调试）
+- `refactoring-expert`（重构）
+- `documentation-engineer`（文档）
+
+---
+
+### 4.4 并行调用多个专家
+
+#### 自动识别调用
+
+当你的描述符合某个子代理的专业领域时，Claude 会**自动调用**对应的专家：
+
+```
+你：这段代码有性能问题
+Claude：[自动识别] 调用 performance-engineer 代理...
+        基于性能优化的最佳实践，我来分析瓶颈...
+
+你：帮我检查代码质量
+Claude：[自动识别] 调用 code-reviewer 代理...
+        我注意到以下代码质量问题...
+```
+
+#### 显式调用多个专家
+
+对于复杂任务，**显式并行调用**多个专家：
+
+```
+并行调用各个专家查看/解决 XXXX 问题
+
+需要：
+- code-reviewer 检查代码质量
+- performance-engineer 分析性能
+- security-auditor 审计安全漏洞
+```
+
+Claude 会同时启动 3 个子代理，返回综合报告。
+
+#### 常见场景示例
+
+| 场景 | 调用代理 | 效果 |
+|------|---------|------|
+| **代码审查** | code-reviewer | 快速找出质量问题 |
+| **性能优化** | performance-engineer + database-optimizer | 全面分析瓶颈 |
+| **安全审计** | security-auditor + penetration-tester | 深度安全检查 |
+| **新项目启动** | architecture-reviewer + project-manager + tech-writer | 快速生成架构文档 |
+| **重构遗留代码** | legacy-code-modernizer + refactoring-expert | 系统现代化 |
+| **API 设计** | api-designer + api-documenter | 完整的设计方案 |
+
+---
+
+### 4.5 故障排查
+
+| 现象 | 原因 | 解决方法 |
+|------|------|---------|
+| `/agents` 看不到任何代理 | 安装路径错误或仓库未克隆 | 确认代理文件在 `~/.claude/agents/` 或 `.claude/agents/` |
+| 代理安装成功但不被调用 | Subagent 定义文件格式错误 | 检查 `.md` 文件的 frontmatter 格式 |
+| 并行调用代理导致超时 | 启动的代理太多，超过 token 限制 | 减少并行代理数量，改为分批调用 |
+| 代理返回结果不符合预期 | 代理描述匹配度不高 | 在调用时更明确地说明需求，或显式指定代理 |
+| Token 消耗过多 | 每个子代理都有独立上下文 | 按需调用，避免一次性启动太多代理 |
+
+---
+
+## 5. 总结
 
 本章你已掌握：
 
@@ -304,10 +492,12 @@ Hook 脚本执行时，Claude 会注入以下变量：
 4. **Commands 联动**：`mcp__服务器名__工具名` 在 Commands 中直接调用 MCP
 5. **Hooks 本质**：事件驱动的 shell 脚本，PreToolUse / PostToolUse / Stop 三大时机
 6. **Hooks 实战**：自动格式化、安全日志、完成通知，一次配置永久生效
+7. **Subagent 本质**：Claude 调动的专家团队，100+ 代理库，按需并行协作
+8. **Subagent 实战**：快速安装、自动识别、显式并行调用，提升开发效率 10 倍
 
 ---
 
-## 5. 参考资料
+## 6. 参考资料
 
 ### MCP 相关资源
 
@@ -320,6 +510,12 @@ Hook 脚本执行时，Claude 会注入以下变量：
 - [Claude Code 官方 Hooks 文档](https://code.claude.com/docs/zh-CN/hooks)
 - [知乎深度讲解：Claude Hooks 自动化工作流完全指南](https://zhuanlan.zhihu.com/p/1950634615065809103)
 - [CSDN 教程：Claude Hooks 实战与最佳实践](https://blog.csdn.net/qq_20042935/article/details/156891507)
+
+### Subagent 相关资源
+
+- [VoltAgent - Awesome Claude Code Subagents](https://github.com/VoltAgent/awesome-claude-code-subagents)
+- [Subagent 子代理完整指南：100+ 专家代理一键扩展](https://mp.weixin.qq.com/s)
+- [Claude Code Task 工具官方文档](https://code.claude.com/docs/zh-CN/task-tool)
 
 ---
 
