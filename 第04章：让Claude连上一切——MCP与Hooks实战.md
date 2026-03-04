@@ -20,6 +20,7 @@
   - [3.6 故障排查](#36-故障排查)
 - [4. 总结](#4-总结)
 - [5. 参考资料](#5-参考资料)
+- [下一步学习](#下一步学习)
 
 ---
 
@@ -319,3 +320,13 @@ Hook 脚本执行时，Claude 会注入以下变量：
 - [Claude Code 官方 Hooks 文档](https://code.claude.com/docs/zh-CN/hooks)
 - [知乎深度讲解：Claude Hooks 自动化工作流完全指南](https://zhuanlan.zhihu.com/p/1950634615065809103)
 - [CSDN 教程：Claude Hooks 实战与最佳实践](https://blog.csdn.net/qq_20042935/article/details/156891507)
+
+---
+
+## 下一步学习
+
+| 章节 | 主题 | 你将学到 |
+|------|------|---------|
+| 第05章 | Skills 定制——给Claude装上专属能力包 | Skill 开发、自动激活机制、复杂提示词组织 |
+| 第06章 | CLAUDE.md 完整配置指南 | 项目规范管理、长期记忆维护、团队协作 |
+| 第07章 | Plugins 生态完整指南 | 插件安装、配置与自定义开发 |

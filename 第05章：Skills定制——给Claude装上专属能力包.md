@@ -19,6 +19,7 @@
   - [6.1 目录结构](#61-目录结构)
   - [6.2 SKILL.md 配置详解](#62-skillmd-配置详解)
   - [6.3 实战：5分钟创建代码注释 Skill](#63-实战5分钟创建代码注释-skill)
+  - [6.4 测试 Skill](#64-测试-skill)
 - [7. Skills 使用方法](#7-skills-使用方法)
 - [8. 进阶使用](#8-进阶使用)
   - [8.1 提示词组织技巧](#81-提示词组织技巧)
@@ -27,6 +28,7 @@
 - [9. 故障排查](#9-故障排查)
 - [10. 总结](#10-总结)
 - [11. 参考资料](#11-参考资料)
+- [下一步学习](#下一步学习)
 
 ---
 
@@ -270,26 +272,37 @@ mkdir -p ~/claude-plugins/connect-apps-plugin
 cd ~/claude-plugins/connect-apps-plugin
 # 克隆插件仓库（如果没有git，先安装：brew install git / apt install git）
 git clone https://github.com/ComposioHQ/awesome-claude-skills.git .
-# 加载 选yes 回车
-claude --plugin-dir ~/claude-plugins/connect-apps-plugin
+# cmd 命令拷贝到 .claude\skills\ 目录下
+xcopy "%USERPROFILE%\claude-plugins\connect-apps-plugin" "%USERPROFILE%\.claude\skills\" /E /H /Y
+# 检查是否安装
+claude
+/skills
 ```
 
-![image-20260303164926000](D:\Desktop\cc\assets\image-20260303164926000.png)
+![image-20260304101146734](D:\Desktop\cc\assets\image-20260304101146734.png)
 
-<img src="D:\Desktop\cc\assets\image-20260303165328075.png" alt="image-20260303165328075" style="zoom: 67%;" />
+![image-20260304101121234](D:\Desktop\cc\assets\image-20260304101121234.png)
 
-![image-20260303162229877](D:\Desktop\cc\assets\image-20260303162229877.png)
+![image-20260304101211232](D:\Desktop\cc\assets\image-20260304101211232.png)
+
+**powershell**
+
+```
+# 1. 确保目标目录存在（不存在则创建）
+New-Item -Path "~\.claude\skills" -ItemType Directory -Force
+
+# 2. 复制源目录下的所有文件/子文件夹到目标目录（关键：末尾加 \*）
+Copy-Item -Path "~\claude-plugins\connect-apps-plugin\*" -Destination "~\.claude\skills" -Recurse -Force
+```
+
+![image-20260304101729390](D:\Desktop\cc\assets\image-20260304101729390.png)
 
 ### 5.3 自定义 Skill 开发（本地安装）
 
 一旦你创建了自定义 Skill，可以通过以下方式安装：
 
-**方式一：CLI 添加本地文件夹**
-```bash
-/plugin add /path/to/your-skill-folder
-```
+**放入标准目录**
 
-**方式二：放入标准目录**
 ```bash
 # macOS/Linux
 mkdir -p ~/.claude/skills/my-skill
@@ -435,7 +448,12 @@ for item in items:
     process(item)
 ```
 
+![image-20260304111955336](D:\Desktop\cc\assets\image-20260304111955336.png)
+
+![image-20260304112023280](D:\Desktop\cc\assets\image-20260304112023280.png)
+
 ### 2. 注释格式规范
+
 - **函数/方法**：说明功能、参数、返回值
 - **复杂逻辑**：解释业务背景
 - **魔法数字**：说明数值含义（如 86400 = 24小时）
@@ -444,66 +462,131 @@ for item in items:
 - 使用简洁中文
 - 专业术语保持英文（如 API、JWT、JSON）
 
-## 输出格式
-直接输出添加注释后的完整代码，不需要额外解释。
+### 6.4 测试 Skill
+
+**Step 1：启动 Claude Code**
+
+```bash
+claude
 ```
 
-**Step 3：测试**
+**Step 2：测试触发**
 
-启动 Claude Code，输入触发词验证：
+在对话中输入：
 
 ```
-You: 帮我给这段代码添加注释
+帮我给这段代码添加注释
 
 def calculate_discount(price, user_level):
     if user_level == "vip":
         return price * 0.8
     elif user_level == "svip":
         return price * 0.7
-    return price
+    else:
+        return price
 ```
 
-> **热更新**：修改 `SKILL.md` 后**无需重启**，下次对话自动生效。
+**Step 3：验证预期响应**
+
+Claude 应该自动激活 `code-commenter` Skill，并返回带详细中文注释的代码：
+
+```python
+def calculate_discount(price, user_level):
+    """
+    根据用户等级计算折扣后的价格
+
+    Args:
+        price: 原始价格
+        user_level: 用户等级（vip/svip/普通）
+
+    Returns:
+        折扣后的价格
+    """
+    # VIP用户享受8折优惠
+    if user_level == "vip":
+        return price * 0.8
+    # SVIP用户享受7折优惠
+    elif user_level == "svip":
+        return price * 0.7
+    # 普通用户无折扣
+    else:
+        return price
+```
+
+![image-20260304113812089](D:\Desktop\cc\assets\image-20260304113812089.png)
+
+**🎯 Hot Reloading 体验**
+
+修改 `SKILL.md` 后，**无需重启 Claude Code**，下次对话时修改会自动生效！
+
+尝试：
+1. 编辑 `.claude/skills/code-commenter/SKILL.md`，修改注释原则
+2. 回到 Claude Code，继续对话（不用重启）
+3. 观察新的规则是否立即应用
 
 ---
 
 ## 7. Skills 使用方法
 
-### 自动调用（推荐）
+### 7.1 自动激活 vs 手动触发
 
-启用 Skills 后，Claude 会在检测到相关任务时**自动触发**，无需任何额外指令：
+**自动激活（推荐）**：
 
-```
-例1：自动调用 document-skills
-你：上传一个 PDF 文件，帮我提取其中的数据
-Claude：[自动加载 document-skills]
-       [自动识别 PDF 格式并解析]
-       以下是提取的数据：...
-
-例2：自动调用 code-commenter Skill
-你：帮我给这段代码加注释
-Claude：[自动加载 code-commenter Skill]
-       [按照注释规范添加注释]
-```
-
-**优点**：
-- 无需手动触发，用户体验流畅
-- Claude 自动识别最合适的 Skill
-- 自然对话流，无额外指令
-
-### 手动触发
-
-如需强制调用特定 Skill，可在提示中明确指定：
+Claude 自动识别用户输入中的触发关键词，激活对应的 Skill：
 
 ```
-使用周报自动生成器 Skill 帮我创建本周周报
-帮我用代码注释生成器处理这段代码
+用户：帮我给这段代码添加注释
+Claude：[自动识别"添加注释" → 激活 code-commenter Skill]
 ```
 
-**何时使用**：
-- 多个 Skill 都适用，需要指定特定的
-- 自动激活失效时的备选方案
-- 精确控制工作流程
+关键是写好 `description` 字段，列举明确的触发词：
+
+```yaml
+---
+name: code-commenter
+description: 当用户要求"添加注释"、"给代码加注释"或"代码注释"时激活
+---
+```
+
+**手动触发**：
+
+用户显式在开始时声明使用某个 Skill：
+
+```
+我需要用 code-commenter Skill，帮我给这段代码添加注释
+def calculate():
+    ...
+```
+
+### 7.2 Skill 交互模式
+
+| 模式 | 使用场景 | 示例 |
+|------|---------|------|
+| **单词触发** | 一句话激活，继续对话 | "帮我添加注释" → 输入代码 → 自动应用 |
+| **链式调用** | 多个 Skill 协作 | 先用 title-generator → 再用 content-writer |
+| **反复迭代** | 同一 Skill 多次使用 | 生成标题 → 用户反馈 → 再生成 |
+
+### 7.3 与 Commands 的配合
+
+**最佳实践**：Command 作为入口，Skill 提供能力
+
+```
+命令层：/write 《标题》
+   ↓
+Skill 层：自动加载 title-generator 和 content-writer
+   ↓
+输出：完整文章
+```
+
+在 Commands 的 `.md` 中调用 Skill：
+
+```markdown
+# /write 命令
+
+帮我写一篇关于「{topic}」的公众号文章。
+
+> 使用 Skill：title-generator + gongzhonghao-writer
+```
 
 ---
 
@@ -511,38 +594,116 @@ Claude：[自动加载 code-commenter Skill]
 
 ### 8.1 提示词组织技巧
 
-**按功能分章节**（推荐）：
+本节目的：掌握在 SKILL.md 中组织提示词的最佳实践。
+
+> **2.10+ 重大变化**：所有提示词内容统一写在 SKILL.md 的 Markdown Body 中，无需单独的 `prompts/` 文件夹。
+
+#### 4.1 提示词组织方式
+
+推荐**按功能分章节**组织，保持清晰的层次：
 
 ```markdown
-# 公众号写作助手
+# [Skill名称]
 
 ## 一、角色定义
-你是资深公众号写作专家...
+[AI扮演的角色]
 
-## 二、标题生成规范
-### 公式1：工具推荐型
-[品牌词] + [数字] + [推荐词]
-示例：Claude Code 5个必装插件，让你的开发效率翻倍
+## 二、核心能力
+[3-5个核心能力列表]
 
-### 公式2：教程型
-[动作词] + [品牌词] + [场景]
-示例：手把手教你用 Cursor，从入门到精通只需2小时
+## 三、工作流程
+### 步骤1：...
+### 步骤2：...
 
-## 三、写作风格规范
-...
+## 四、规则约束
+[必须遵守的规则]
+
+## 五、示例展示
+[好/坏示例对比]
+
+## 六、输出格式
+[输出结构定义]
 ```
 
-**版本管理**（建议在 Markdown Body 开头记录）：
+#### 4.2 章节命名规范
+
+| 命名模式 | 示例 | 说明 |
+|---------|------|------|
+| `## 一、xxx` | `## 一、角色定义` | 主要章节 |
+| `## {功能}规范` | `## 标题生成规范` | 功能说明 |
+| `### {子功能}` | `### 公式1：工具推荐型` | 子功能细节 |
+
+**最佳实践**：保持 3 级以内的层次，使用清晰中文标题。
+
+#### 4.3 提示词结构模板
 
 ```markdown
-## 版本历史
-### V2.0.0 (2025-01-18)
-- 适配 Claude Code 2.10+
-- 改为单文件 SKILL.md 结构
+---
+name: skill-name
+description: 当用户[具体场景]时激活
+version: 1.0.0
+---
 
-### V1.0.0 (2025-01-01)
-- 初始版本
+# Skill 名称
+
+## 一、角色定义
+你是一位[专业背景]的专家...
+
+## 二、核心能力
+1. [能力1]
+2. [能力2]
+3. [能力3]
+
+## 三、工作流程
+### 步骤1：[分析/准备]
+### 步骤2：[执行]
+### 步骤3：[验证]
+
+## 四、规则约束
+- 必须遵守的规则1
+- 必须遵守的规则2
+
+## 五、示例展示
+✅ **好的示例**
+❌ **差的示例**
 ```
+
+#### 4.4 提示词版本管理
+
+在 SKILL.md 开头记录版本历史：
+
+```markdown
+---
+name: my-skill
+version: 2.0.0
+---
+
+## 版本历史
+### V2.0.0 (2025-01)
+- 新增：XXX
+- 优化：YYY
+
+### V1.0.0 (2024-12)
+- 初版发布
+```
+
+#### 4.5 提示词优化技巧
+
+**1. 用代码块强调公式**
+```markdown
+### 标题公式
+[品牌词] + [数字] + [推荐词]
+```
+
+**2. 用表格对比版本**
+| 版本 | 改进点 |
+|------|--------|
+| V1.0 | 基础功能 |
+| V2.0 | 新增XXX |
+
+**3. 用强指令替代建议**
+- ❌ "建议使用中文"
+- ✅ "必须使用简洁中文"
 
 ### 8.2 Python 脚本集成
 
@@ -669,14 +830,6 @@ print('✅ YAML 格式正确')
 5. **自动激活原理**：Claude 根据 `description` 自动识别触发场景，自动加载 Skill
 6. **脚本集成**：通过 `scripts/` 目录接入 Python 脚本，实现精确计算和自动化处理
 
-**下一步学习：**
-
-| 章节 | 主题 | 你将学到 |
-|------|------|---------|
-| 第06章 | CLAUDE.md 完整配置指南 | 让 Claude 长期记住项目规范和个人偏好 |
-| 第07章 | Plugins 生态完整指南 | 插件安装、配置与自定义开发 |
-| 第08章 | Claude Agent SDK | Subagents 多角色协作、并行任务编排 |
-
 ---
 
 ## 11. 参考资料
@@ -685,3 +838,14 @@ print('✅ YAML 格式正确')
 - [Claude Code 官方 Skills 文档](https://code.claude.com/docs/zh-CN/skills)
 - [知乎深度讲解：Claude Code Skills 定制完整指南](https://zhuanlan.zhihu.com/p/2000662940370626160)
 - [Claude 中文文档：Skills 开发与使用](https://claudecn.com/docs/claude-code/advanced/skills/)
+
+---
+
+## 下一步学习
+
+| 章节 | 主题 | 你将学到 |
+|------|------|---------|
+| 第06章 | CLAUDE.md 完整配置指南 | 让 Claude 长期记住项目规范和个人偏好 |
+| 第07章 | Plugins 生态完整指南 | 插件安装、配置与自定义开发 |
+| 第08章 | Claude Agent SDK | Subagents 多角色协作、并行任务编排 |
+
