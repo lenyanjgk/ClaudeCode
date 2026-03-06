@@ -1,4 +1,4 @@
-# 第四章：让Claude连上一切——MCP与Hooks实战
+# 第四章：让Claude连上一切——MCP、Hooks与Subagent实战
 
 ## 目录
 
@@ -341,35 +341,19 @@ Hook 脚本执行时，Claude 会注入以下变量：
 
 ### 4.2 快速安装
 
-#### 方法一：用 GitHub MCP 自动安装（最省事）
-
-如果你配置了 GitHub MCP 服务器（见第2章），直接在 Claude Code 输入：
-
-```
-使用 Github MCP，帮我下载安装 https://github.com/VoltAgent/awesome-claude-code-subagents
-```
-
-Claude 会**自动克隆仓库、识别代理定义文件，并安装到正确位置**。
-
-#### 方法二：交互式脚本安装（推荐）
+#### 方法一：交互式脚本安装（推荐）
 
 ```bash
-git clone https://github.com/VoltAgent/awesome-claude-code-subagents.git
-cd awesome-claude-code-subagents
-./install-agents.sh
+claude plugin marketplace add VoltAgent/awesome-claude-code-subagents
 ```
 
-按照屏幕提示操作：该脚本允许你浏览分类、选择特定代理并一键完成**安装或卸载**。
-
-#### 方法三：一行命令快速安装（无需克隆）
-
-```bash
-curl -sO https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/install-agents.sh
-chmod +x install-agents.sh
-./install-agents.sh
+```
+claude plugin install <plugin-name>
 ```
 
-#### 方法四：手动安装（完全控制）
+或者/plugin Installed界面自行安装
+
+#### 方法二：手动安装（完全控制）
 
 1. **确定存放路径**：
    - 全局可用：`~/.claude/agents/`
@@ -383,7 +367,22 @@ chmod +x install-agents.sh
 claude /agents
 ```
 
-> **优先级规则**：如果同一个代理同时存在于项目文件夹和全局文件夹，项目特定代理的优先级更高。
+### 故障排查与相关截图：
+
+如果是网络问题需要检查自己的代理软件（🪜）
+
+可能安装过程需要代理软件，看自己的个人配置（自己的代理接口）或者手动安装
+
+```
+$env:HTTP_PROXY = "http://127.0.0.1:7897"
+$env:HTTPS_PROXY = "http://127.0.0.1:7897"
+```
+
+![image-20260306143259905](D:\Desktop\cc\assets\image-20260306143259905.png)
+
+![image-20260306143333962](D:\Desktop\cc\assets\image-20260306143333962.png)
+
+![image-20260306144520059](D:\Desktop\cc\assets\image-20260306144520059.png)
 
 ---
 
