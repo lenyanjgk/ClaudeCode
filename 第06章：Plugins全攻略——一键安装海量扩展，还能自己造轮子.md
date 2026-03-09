@@ -162,9 +162,9 @@ claude plugin marketplace list
 
 添加成功后，就能从该源浏览和安装 Plugin 了。
 
-![image-20260306152553451](D:\Desktop\cc\assets\image-20260306152553451.png)
+![image-20260306152553451](assets/image-20260306152553451.png)
 
-![image-20260306152751059](D:\Desktop\cc\assets\image-20260306152751059.png)
+![image-20260306152751059](assets/image-20260306152751059.png)
 
 **实战：添加 Marketplace 源并安装 Plugin**
 
@@ -182,11 +182,11 @@ claude plugin install <plugin-name>
 
 或者在对话中输入 `/plugin`，切换到 `Installed` 界面自行浏览安装。
 
-![image-20260306143259905](D:\Desktop\cc\assets\image-20260306143259905.png)
+![image-20260306143259905](assets/image-20260306143259905.png)
 
-![image-20260306143333962](D:\Desktop\cc\assets\image-20260306143333962.png)
+![image-20260306143333962](assets/image-20260306143333962.png)
 
-![image-20260306144520059](D:\Desktop\cc\assets\image-20260306144520059.png)
+![image-20260306144520059](assets/image-20260306144520059.png)
 
 > **网络问题？** 如果安装过程中遇到超时或下载失败，需要检查代理软件配置：
 >
@@ -225,7 +225,7 @@ claude plugin install <plugin-name>
 
 打开 `/plugin`，默认进入 **Discover** 标签页，列出所有已添加 Marketplace 源中的可用 Plugin：
 
-![image-20260306165915173](D:\Desktop\cc\assets\image-20260306165915173.png)
+![image-20260306165915173](assets/image-20260306165915173.png)
 
 **安装步骤：**
 
@@ -233,7 +233,7 @@ claude plugin install <plugin-name>
 2. 按**回车**查看详情（或直接按**空格**快速安装）
 3. 在详情页选择**安装范围**，确认安装
 
-![image-20260306165927770](D:\Desktop\cc\assets\image-20260306165927770.png)
+![image-20260306165927770](assets/image-20260306165927770.png)
 
 **安装范围说明：**
 
@@ -257,7 +257,7 @@ claude plugin install <plugin-name>
 
 切换到 **Installed** 标签页，查看所有已启用的 Plugin：
 
-![image-20260306165957152](D:\Desktop\cc\assets\image-20260306165957152.png)
+![image-20260306165957152](assets/image-20260306165957152.png)
 
 列表中同时显示 Plugin 系统安装的扩展和 MCP 连接，每条显示名称、版本和状态。
 
@@ -273,13 +273,13 @@ claude plugin install <plugin-name>
 
 > **自动更新**：Claude Code 启动时会自动检查所有 Plugin 更新，无需手动触发。
 
-![image-20260306170011720](D:\Desktop\cc\assets\image-20260306170011720.png)
+![image-20260306170011720](assets/image-20260306170011720.png)
 
 ### 4.3 管理 Marketplace 源（Marketplaces 标签页）
 
 切换到 **Marketplaces** 标签页，管理 Plugin 的来源：
 
-![image-20260306170026630](D:\Desktop\cc\assets\image-20260306170026630.png)
+![image-20260306170026630](assets/image-20260306170026630.png)
 
 界面列出所有已添加的 Marketplace 源，每个源显示可用 / 已安装的 Plugin 数量，以及最后更新时间。
 
@@ -289,7 +289,7 @@ claude plugin install <plugin-name>
 2. 输入源地址（格式：`用户名/仓库名`）
 3. 确认添加后，Discover 标签页自动同步新来源的 Plugin
 
-![image-20260306170039452](D:\Desktop\cc\assets\image-20260306170039452.png)
+![image-20260306170039452](assets/image-20260306170039452.png)
 
 **推荐 Marketplace 源：**
 
