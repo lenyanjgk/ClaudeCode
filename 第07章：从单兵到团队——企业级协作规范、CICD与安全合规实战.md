@@ -48,6 +48,31 @@
 
 从团队规范到 CI/CD 集成，从安全合规到成本控制，一章讲完企业级 Claude Code 部署的全部要点。3 人团队能用，100 人团队也能用。
 
+### 本章架构总览
+
+```mermaid
+graph TD
+    A["团队开发者"] -->|共享规范| B["CLAUDE.md 三层配置"]
+    A -->|标准化结构| C["项目结构规范"]
+    A -->|提交代码| D["Git 仓库"]
+
+    D -->|触发| E["GitHub Actions<br/>CI/CD 流水线"]
+    E -->|自动化检查| F["Lint / 测试 / 构建"]
+    F -->|代码审查| G["Claude Code<br/>自动审查命令"]
+
+    B -->|配置权限| H["allowedTools<br/>白名单"]
+    B -->|配置工作流| I["Commands 集合"]
+
+    H -->|限制工具| J["安全保护"]
+    I -->|提供能力| J
+
+    J -->|确保合规| K["审计日志"]
+    F -->|记录历史| K
+
+    style A fill:#4338ca
+    style K fill:#10b981
+```
+
 ---
 
 ## 2. 团队协作规范
@@ -288,6 +313,33 @@ Claude Code 支持三层 CLAUDE.md，优先级从低到高：
 ---
 
 ## 3. CI/CD 集成
+
+**CI/CD 流程全景图**：
+
+```mermaid
+sequenceDiagram
+    participant Dev as 开发者
+    participant Repo as Git 仓库
+    participant Actions as GitHub Actions
+    participant Lint as 代码检查
+    participant Test as 自动化测试
+    participant Build as 构建系统
+    participant Review as Claude 审查
+    participant Deploy as 部署环境
+
+    Dev->>Repo: git push 提交代码
+    Repo->>Actions: Webhook 触发工作流
+    Actions->>Lint: 运行 Linter
+    Lint->>Actions: ✓/✗ 返回结果
+    Actions->>Test: 执行单元测试
+    Test->>Actions: ✓/✗ 返回结果
+    Actions->>Build: 编译/构建
+    Build->>Actions: ✓/✗ 返回结果
+    Actions->>Review: 触发 Claude Code 代码审查
+    Review->>Repo: 添加审查注释
+    Repo->>Deploy: 审查通过，自动部署
+    Deploy->>Dev: 发送完成通知
+```
 
 ### 3.1 GitHub Actions 基础配置
 
