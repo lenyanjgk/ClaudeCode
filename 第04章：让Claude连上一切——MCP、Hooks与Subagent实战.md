@@ -242,7 +242,54 @@ Hooks 写在 `settings.json` 的 `hooks` 字段，支持两个位置：
 }
 ```
 
-**`matcher` 说明**：匹配工具名，支持正则。`Write|Edit` 同时匹配两个工具，留空则匹配所有工具。
+**`matcher` 正则匹配规则详解**：
+
+`matcher` 用于精确控制 Hook 触发的工具范围，支持正则表达式：
+
+| 模式 | 含义 | 示例 |
+|------|------|------|
+| 空字符串 `""` | 匹配所有工具 | 任何工具操作都触发 |
+| 精确匹配 | 工具名相同 | `Write` 仅匹配 Write 工具 |
+| 竖线 `\|` | 逻辑 OR，多个工具 | `Write\|Edit` 同时匹配两个工具 |
+| `.` | 匹配任意单字符 | `Wr.te` 匹配 Write |
+| `^` | 字符串开始 | `^Bash$` 精确匹配 Bash，避免误匹配 |
+| `$` | 字符串末尾 | `Tool$` 匹配以 Tool 结尾的工具 |
+
+**常见 matcher 模式示例**：
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [{"type": "command", "command": "echo '任何工具都会触发'"}]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [{"type": "command", "command": "echo '仅 Write 工具触发'"}]
+      },
+      {
+        "matcher": "^Bash$",
+        "hooks": [{"type": "command", "command": "echo '精确匹配 Bash，避免 BashScript 误触发'"}]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [{"type": "command", "command": "prettier --write $CLAUDE_FILE_PATHS"}]
+      },
+      {
+        "matcher": "Read.*",
+        "hooks": [{"type": "command", "command": "echo 'Read 开头的工具'"}]
+      }
+    ]
+  }
+}
+```
+
+**最佳实践**：
+- 使用 `^精确匹配$` 避免正则范围过宽导致的意外触发
+- 在 PreToolUse 中用严格正则防御危险命令
+- PostToolUse 可用较宽松的正则（如 `Write|Edit`）
 
 ### 3.3 实战示例
 
