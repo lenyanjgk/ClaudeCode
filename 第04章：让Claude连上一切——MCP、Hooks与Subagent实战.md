@@ -257,7 +257,7 @@ Hooks 写在 `settings.json` 的 `hooks` 字段，支持两个位置：
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path' I xargs prettier --write"
+            "command": "jq -r '.tool_input.file_path' | xargs prettier --write"
           }
         ]
       }
